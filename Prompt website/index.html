@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparrow - Campus Navigation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-dove nav-icon"></i>
+                <span>Sparrow</span>
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <a href="#" class="nav-link" data-page="splash">Home</a>
+                <a href="#" class="nav-link" data-page="map">Map</a>
+                <a href="#" class="nav-link" data-page="about">About</a>
+                <a href="#" class="nav-link" data-page="settings">Settings</a>
+            </div>
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Splash/Landing Page -->
+    <div id="splash-page" class="page active">
+        <div class="splash-container">
+            <div class="splash-background">
+                <div class="map-outline"></div>
+                <div class="floating-particles"></div>
+            </div>
+            <div class="splash-content">
+                <div class="logo-container">
+                    <i class="fas fa-dove main-logo"></i>
+                    <h1 class="app-title">Sparrow</h1>
+                </div>
+                <p class="tagline">Navigate your campus with precision and style</p>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" data-page="map">
+                        <i class="fas fa-map-marked-alt"></i>
+                        Open Map
+                    </button>
+                    <button class="btn btn-secondary" data-page="about">
+                        <i class="fas fa-info-circle"></i>
+                        Learn More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Map Page -->
+    <div id="map-page" class="page">
+        <div class="map-container">
+            <div class="map-header">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search locations..." id="map-search">
+                    <button class="voice-search-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <div class="map-controls">
+                    <button class="control-btn" id="recenter-btn">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                    <button class="control-btn" id="layers-btn">
+                        <i class="fas fa-layer-group"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="category-filters">
+                <button class="filter-btn active" data-category="all">
+                    <i class="fas fa-th"></i>
+                    All
+                </button>
+                <button class="filter-btn" data-category="academic">
+                    <i class="fas fa-graduation-cap"></i>
+                    Academic
+                </button>
+                <button class="filter-btn" data-category="labs">
+                    <i class="fas fa-flask"></i>
+                    Labs
+                </button>
+                <button class="filter-btn" data-category="cafeterias">
+                    <i class="fas fa-utensils"></i>
+                    Cafeterias
+                </button>
+                <button class="filter-btn" data-category="hostels">
+                    <i class="fas fa-bed"></i>
+                    Hostels
+                </button>
+                <button class="filter-btn" data-category="facilities">
+                    <i class="fas fa-building"></i>
+                    Facilities
+                </button>
+                <button class="filter-btn" data-category="parking">
+                    <i class="fas fa-parking"></i>
+                    Parking
+                </button>
+            </div>
+
+            <div id="map" class="leaflet-map"></div>
+
+            <div class="directions-panel" id="directions-panel">
+                <div class="panel-header">
+                    <h3>Directions</h3>
+                    <button class="close-panel" id="close-directions">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="route-info">
+                    <div class="route-summary">
+                        <span class="distance">350m</span>
+                        <span class="time">4 min walk</span>
+                    </div>
+                </div>
+                <div class="directions-list" id="directions-list">
+                    <!-- Directions will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Details Page -->
+    <div id="location-page" class="page">
+        <div class="location-container">
+            <div class="location-header">
+                <button class="back-btn" id="location-back">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="location-title" id="location-title">Location Name</h2>
+                <button class="share-btn" id="share-location">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+            
+            <div class="location-image">
+                <div class="image-placeholder" id="location-image">
+                    <i class="fas fa-image"></i>
+                    <span>Photo placeholder</span>
+                </div>
+            </div>
+
+            <div class="location-info">
+                <div class="info-card">
+                    <h3>Description</h3>
+                    <p id="location-description">Location description will appear here...</p>
+                </div>
+                
+                <div class="info-card">
+                    <div class="distance-info">
+                        <i class="fas fa-route"></i>
+                        <span>Distance from you: </span>
+                        <span class="distance-value" id="location-distance">250m</span>
+                    </div>
+                </div>
+
+                <div class="location-actions">
+                    <button class="btn btn-primary btn-full" id="navigate-btn">
+                        <i class="fas fa-directions"></i>
+                        Navigate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results Page -->
+    <div id="search-page" class="page">
+        <div class="search-container">
+            <div class="search-header">
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search locations..." id="main-search">
+                    <button class="clear-search" id="clear-search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="recent-searches" id="recent-searches">
+                <h3>Recent Searches</h3>
+                <div class="recent-list">
+                    <div class="recent-item">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        <span>Computer Lab 1</span>
+                        <button class="remove-recent">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="recent-item">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        <span>Main Cafeteria</span>
+                        <button class="remove-recent">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-results" id="search-results">
+                <h3>Search Results</h3>
+                <div class="results-list">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About/Info Page -->
+    <div id="about-page" class="page">
+        <div class="about-container">
+            <div class="about-header">
+                <div class="logo-container">
+                    <i class="fas fa-dove about-logo"></i>
+                    <h1>Sparrow</h1>
+                </div>
+                <p class="version">Version 1.0.0</p>
+            </div>
+
+            <div class="about-content">
+                <div class="info-section">
+                    <h3>About the App</h3>
+                    <p>Sparrow is a cutting-edge campus navigation application designed to help students, faculty, and visitors navigate your campus with ease. Using advanced mapping technology and an intuitive interface, Sparrow makes finding your way around campus effortless.</p>
+                </div>
+
+                <div class="info-section">
+                    <h3>How to Use</h3>
+                    <div class="instruction-list">
+                        <div class="instruction-item">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <div>
+                                <h4>Open the Map</h4>
+                                <p>Access the interactive campus map to see your location and all points of interest</p>
+                            </div>
+                        </div>
+                        <div class="instruction-item">
+                            <i class="fas fa-search"></i>
+                            <div>
+                                <h4>Search Locations</h4>
+                                <p>Use the search feature to quickly find specific buildings, labs, cafeterias, or parking areas</p>
+                            </div>
+                        </div>
+                        <div class="instruction-item">
+                            <i class="fas fa-route"></i>
+                            <div>
+                                <h4>Get Directions</h4>
+                                <p>Receive step-by-step walking directions to any location on campus</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>Feedback & Contact</h3>
+                    <div class="contact-links">
+                        <a href="#" class="contact-link">
+                            <i class="fas fa-envelope"></i>
+                            feedback@sparrow.campus
+                        </a>
+                        <a href="#" class="contact-link">
+                            <i class="fas fa-bug"></i>
+                            Report a Bug
+                        </a>
+                        <a href="#" class="contact-link">
+                            <i class="fas fa-star"></i>
+                            Rate the App
+                        </a>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>Credits</h3>
+                    <p class="credits">
+                        Developed with ❤️ for campus navigation<br>
+                        Maps powered by OpenStreetMap<br>
+                        Icons by Font Awesome
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="settings-page" class="page">
+        <div class="settings-container">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <p>Customize your Sparrow experience</p>
+            </div>
+
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Appearance</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-palette"></i>
+                            <div>
+                                <h4>Theme</h4>
+                                <p>Choose your preferred theme</p>
+                            </div>
+                        </div>
+                        <div class="toggle-container">
+                            <input type="checkbox" id="theme-toggle" class="toggle-input">
+                            <label for="theme-toggle" class="toggle-label">
+                                <span class="toggle-text light">Light</span>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-text dark">Dark</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Map Preferences</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-ruler"></i>
+                            <div>
+                                <h4>Units</h4>
+                                <p>Distance measurement units</p>
+                            </div>
+                        </div>
+                        <select class="setting-select" id="units">
+                            <option value="metric">Metric (m, km)</option>
+                            <option value="imperial">Imperial (ft, mi)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Performance</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-download"></i>
+                            <div>
+                                <h4>Offline Mode</h4>
+                                <p>Download maps for offline use</p>
+                            </div>
+                        </div>
+                        <div class="toggle-container">
+                            <input type="checkbox" id="offline-toggle" class="toggle-input">
+                            <label for="offline-toggle" class="toggle-label">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Data & Privacy</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fas fa-trash"></i>
+                            <div>
+                                <h4>Clear Data</h4>
+                                <p>Clear search history and cached data</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-danger" id="clear-data">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Sidebar -->
+    <div id="sidebar-overlay" onclick="closeCommentsPanel()"></div>
+    <div id="comments-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <span id="comments-location-title">Location Comments</span>
+                <button class="close-sidebar" onclick="closeCommentsPanel()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="sidebar-content">
+            <div class="comments-section">
+                <h4><i class="fas fa-comments" style="margin-right: 0.5rem; color: var(--metallic-silver);"></i>Comments</h4>
+                <div id="comments-list">
+                    <!-- Comments will be populated here -->
+                </div>
+            </div>
+        </div>
+        <div class="comment-form">
+            <h4><i class="fas fa-plus-circle" style="margin-right: 0.5rem; color: var(--metallic-silver);"></i>Add Comment</h4>
+            <div class="form-group">
+                <label for="comment-author">Your Name</label>
+                <input type="text" id="comment-author" placeholder="Enter your name..." required>
+            </div>
+            <div class="form-group">
+                <label for="comment-input">Comment</label>
+                <textarea id="comment-input" rows="3" placeholder="Share your thoughts about this location..." required></textarea>
+            </div>
+            <button class="comment-btn" onclick="addComment()">
+                <i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>
+                Post Comment
+            </button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
