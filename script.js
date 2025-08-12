@@ -26,3 +26,52 @@ var map = L.map("map").setView([26.9124, 75.7873], 13);
           map.fitBounds(bounds);
           map.setMaxBounds(paddedBounds);
         });
+
+if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        console.log("Your location:", lat, lon);
+
+        // Add marker on map
+        const gpsMarker = L.marker([lat, lon]).addTo(map);
+        gpsMarker.bindPopup("You are here!").openPopup();
+
+        // Move map to your location
+        map.setView([lat, lon], 18);
+    }, function(error) {
+        console.error("Error getting location:", error);
+    }, {
+        enableHighAccuracy: true,  // Use GPS for highest accuracy
+        timeout: 10000,
+        maximumAge: 0
+    });
+} else {
+    alert("Geolocation is not supported by your browser");
+}
+
+navigator.geolocation.getCurrentPosition(function(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    const accuracy = position.coords.accuracy; // in meters
+
+    L.marker([lat, lon]).addTo(map).bindPopup("You are here!").openPopup();
+    L.circle([lat, lon], { radius: accuracy }).addTo(map);
+
+    map.setView([lat, lon], 18);
+}, ...);
+
+navigator.geolocation.watchPosition(function(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    
+    if (window.userMarker) {
+        userMarker.setLatLng([lat, lon]);
+    } else {
+        window.userMarker = L.marker([lat, lon]).addTo(map).bindPopup("You are here!");
+    }
+    
+    map.setView([lat, lon]);
+}, function(err) {
+    console.error(err);
+}, { enableHighAccuracy: true });
