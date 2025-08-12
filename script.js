@@ -1,77 +1,47 @@
-var map = L.map("map").setView([26.9124, 75.7873], 13);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-      }).addTo(map);
 
-      fetch("campus.geojson")
-        .then((res) => res.json())
-        .then((data) => {
-          const campusLayer = L.geoJSON(data).addTo(map);
-          const bounds = campusLayer.getBounds();
+    // Base map
+    var map = L.map("map");
 
-          // Expand bounds by a factor (e.g., 10% padding)
-          const paddingFactor = 0.1;
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19
+    }).addTo(map);
 
-          const southWest = bounds.getSouthWest();
-          const northEast = bounds.getNorthEast();
+    // Load MUJ campus boundaries
+    fetch("campus.geojson")
+      .then(res => res.json())
+      .then(data => {
+        const campusLayer = L.geoJSON(data).addTo(map);
+        const bounds = campusLayer.getBounds();
 
-          const latPadding = (northEast.lat - southWest.lat) * paddingFactor;
-          const lngPadding = (northEast.lng - southWest.lng) * paddingFactor;
+        // Add padding so map doesn't clip the edges
+        const paddedBounds = bounds.pad(0.1);
+        map.fitBounds(bounds);
+        map.setMaxBounds(paddedBounds);
+      });
 
-          const paddedBounds = L.latLngBounds(
-            [southWest.lat - latPadding, southWest.lng - lngPadding],
-            [northEast.lat + latPadding, northEast.lng + lngPadding]
-          );
+    // Live GPS tracking
+    let userMarker = null;
+    let accuracyCircle = null;
 
-          map.fitBounds(bounds);
-          map.setMaxBounds(paddedBounds);
-        });
+    if ("geolocation" in navigator) {
+      navigator.geolocation.watchPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          const accuracy = pos.coords.accuracy;
 
-if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        console.log("Your location:", lat, lon);
-
-        // Add marker on map
-        const gpsMarker = L.marker([lat, lon]).addTo(map);
-        gpsMarker.bindPopup("You are here!").openPopup();
-
-        // Move map to your location
-        map.setView([lat, lon], 18);
-    }, function(error) {
-        console.error("Error getting location:", error);
-    }, {
-        enableHighAccuracy: true,  // Use GPS for highest accuracy
-        timeout: 10000,
-        maximumAge: 0
-    });
-} else {
-    alert("Geolocation is not supported by your browser");
-}
-
-navigator.geolocation.getCurrentPosition(function(position) {
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
-    const accuracy = position.coords.accuracy; // in meters
-
-    L.marker([lat, lon]).addTo(map).bindPopup("You are here!").openPopup();
-    L.circle([lat, lon], { radius: accuracy }).addTo(map);
-
-    map.setView([lat, lon], 18);
-}, ...);
-
-navigator.geolocation.watchPosition(function(position) {
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
-    
-    if (window.userMarker) {
-        userMarker.setLatLng([lat, lon]);
+          if (userMarker) {
+            userMarker.setLatLng([lat, lon]);
+            accuracyCircle.setLatLng([lat, lon]).setRadius(accuracy);
+          } else {
+            userMarker = L.marker([lat, lon]).addTo(map).bindPopup("You are here");
+            accuracyCircle = L.circle([lat, lon], { radius: accuracy }).addTo(map);
+            map.setView([lat, lon], 18);
+          }
+        },
+        (err) => console.error("GPS error:", err),
+        { enableHighAccuracy: true }
+      );
     } else {
-        window.userMarker = L.marker([lat, lon]).addTo(map).bindPopup("You are here!");
+      alert("Geolocation not supported on this device");
     }
-    
-    map.setView([lat, lon]);
-}, function(err) {
-    console.error(err);
-}, { enableHighAccuracy: true });
